@@ -39,10 +39,10 @@ async function sourceImage() {
     return await fs.readFile(path.join(ROOT, cfg.photo));
   } catch {
     // No photo yet: render the initials and turn those into ASCII instead.
-    const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="600" height="600">
-      <rect width="600" height="600" fill="#fff"/>
-      <text x="300" y="300" font-family="Arial Black, Arial, sans-serif" font-weight="900"
-        font-size="300" text-anchor="middle" dominant-baseline="central">${esc(cfg.initials || '?')}</text></svg>`;
+    const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="640" height="400">
+      <defs><linearGradient id="g" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#fff"/><stop offset="1" stop-color="#888"/></linearGradient></defs>
+      <text x="320" y="200" fill="#fff" font-family="DejaVu Sans, Arial Black, Arial, sans-serif" font-weight="900"
+        font-size="300" letter-spacing="12" text-anchor="middle" dominant-baseline="central">${esc(cfg.initials || "?")}</text></svg>`;
     return Buffer.from(svg);
   }
 }
@@ -78,8 +78,8 @@ async function asciiArt(cols, cellAspect = 0.5) {
     let line = "";
     for (let x = 0; x < cols; x++) {
       const i = y * cols + x;
-      if (alpha && alpha[i] < 100) { line += " "; continue; }
-      let v = Math.min(1, Math.max(0, (lum[i] - lo) / Math.max(1, hi - lo)));
+      if (alpha && alpha[i] < 60) { line += " "; continue; }
+      let v = hi - lo < 16 ? alpha[i] / 255 : Math.min(1, Math.max(0, (lum[i] - lo) / Math.max(1, hi - lo)));
       if (invert) v = 1 - v;
       if (alpha) v = 0.12 + 0.88 * v;           // keep the silhouette visible in dark areas
       line += v < 0.08 ? " " : RAMP[Math.min(RAMP.length - 1, Math.floor(v * RAMP.length))];
