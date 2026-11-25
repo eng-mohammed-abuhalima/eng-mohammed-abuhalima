@@ -2,9 +2,7 @@
   "username": "eng-mohammed-abuhalima",
   "name": "Mohammed Abu Halima",
   "title": "Computer Engineer · Full-Stack JS",
-  "photo": null,
-  "initials": "MA",
-  "asciiColumns": 76,
+  "portrait": false,
   "sections": [
     {
       "rows": [

@@ -24,8 +24,10 @@ const THEMES = {
   },
 };
 
-const W = 1000, CHROME_H = 38, PAD = 24;
-const LEFT_W = 400, RX = LEFT_W + 32;           // right panel x
+const PORTRAIT = cfg.portrait !== false;           // set "portrait": false for a text-only card
+const CHROME_H = 38, PAD = 24;
+const LEFT_W = PORTRAIT ? 400 : 0, RX = PORTRAIT ? LEFT_W + 32 : PAD + 8;
+const W = RX + 544 + PAD;           // right panel x
 const FS = 13.5, CW = FS * 0.6, LH = 22;        // right panel font metrics
 const FONT = "ui-monospace, SFMono-Regular, 'JetBrains Mono', Menlo, Consolas, 'Liberation Mono', monospace";
 
@@ -225,10 +227,11 @@ async function render(theme, ascii, stats) {
   const rightBottom = y + PAD;
 
   // ASCII portrait (left)
-  const cols = ascii[0].length;
+  if (!PORTRAIT) ascii = [""];
+  const cols = Math.max(1, ascii[0].length);
   const cellW = (LEFT_W - PAD * 2) / cols, asciiLH = cellW / 0.5, asciiFS = cellW / 0.6;
   const asciiH = ascii.length * asciiLH;
-  const H = Math.ceil(Math.max(rightBottom, CHROME_H + PAD * 2 + asciiH));
+  const H = Math.ceil(PORTRAIT ? Math.max(rightBottom, CHROME_H + PAD * 2 + asciiH) : rightBottom);
   const ay = CHROME_H + (H - CHROME_H - asciiH) / 2;
   const scanDur = 2.4;
   const asciiRows = ascii.map((line, i) => line.trim() ? `<text x="${PAD}" y="${(ay + (i + 0.8) * asciiLH).toFixed(1)}" textLength="${(cols * cellW).toFixed(1)}" lengthAdjust="spacingAndGlyphs" xml:space="preserve">${esc(line)}</text>` : '').join('');
@@ -249,19 +252,19 @@ async function render(theme, ascii, stats) {
   <line x1="0" y1="${CHROME_H}" x2="${W}" y2="${CHROME_H}" stroke="${t.border}"/>
   <circle cx="22" cy="${CHROME_H / 2}" r="6" fill="#ff5f57"/><circle cx="42" cy="${CHROME_H / 2}" r="6" fill="#febc2e"/><circle cx="62" cy="${CHROME_H / 2}" r="6" fill="#28c840"/>
   <text x="${W / 2}" y="${CHROME_H / 2 + 4}" fill="${t.muted}" font-size="12" text-anchor="middle">${esc(title)}  —  zsh</text>
-  <line x1="${LEFT_W + 8}" y1="${CHROME_H + PAD}" x2="${LEFT_W + 8}" y2="${H - PAD}" stroke="${t.rule}"/>
+  ${PORTRAIT ? `  <line x1="${LEFT_W + 8}" y1="${CHROME_H + PAD}" x2="${LEFT_W + 8}" y2="${H - PAD}" stroke="${t.rule}"/>
   <g clip-path="url(#reveal)" fill="url(#ascii)" font-size="${asciiFS.toFixed(2)}" font-weight="700">${asciiRows}</g>
   <rect x="0" y="${ay - 40}" width="${LEFT_W}" height="40" fill="url(#scan)" opacity="0">
     <animate attributeName="y" from="${ay - 40}" to="${ay + asciiH - 36}" begin="0.2s" dur="${scanDur}s" fill="freeze"/>
     <animate attributeName="opacity" values="0;1;1;0" keyTimes="0;0.05;0.9;1" begin="0.2s" dur="${scanDur}s" fill="freeze"/>
-  </rect>
+  </rect>` : ""}
   ${parts.join('\n  ')}
 </g>
 <rect x="0.5" y="0.5" width="${W - 1}" height="${H - 1}" rx="12" fill="none" stroke="${t.border}"/>
 </svg>`;
 }
 
-const ascii = await asciiArt(cfg.asciiColumns || 76);
+const ascii = PORTRAIT ? await asciiArt(cfg.asciiColumns || 76) : [""];
 const stats = await fetchStats();
 await fs.mkdir(path.join(ROOT, 'assets'), { recursive: true });
 for (const theme of Object.keys(THEMES)) {
