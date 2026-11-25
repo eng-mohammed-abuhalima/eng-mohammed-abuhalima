@@ -268,7 +268,7 @@ const ascii = PORTRAIT ? await asciiArt(cfg.asciiColumns || 76) : [""];
 const stats = await fetchStats();
 await fs.mkdir(path.join(ROOT, 'assets'), { recursive: true });
 for (const theme of Object.keys(THEMES)) {
-  const out = path.join(ROOT, 'assets', `terminal-${theme}.svg`);
+  const out = path.join(ROOT, 'assets', `card-${theme}.svg`);
   await fs.writeFile(out, await render(theme, ascii, stats));
   console.log('wrote', path.relative(ROOT, out));
 }
